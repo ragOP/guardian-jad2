@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>SPG — Solar Savings Eligibility</title>
+
+  <!-- Icons -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        referrerpolicy="no-referrer" />
+
+  <style>
+    :root{
+      --ink:#0f172a;       /* text */
+      --muted:#475569;     /* subtle text */
+      --brand:#0ea5e9;     /* header blue */
+      --accent:#22c55e;    /* green */
+      --cta:#16a34a;       /* CTA green */
+      --cta-2:#0ea5e9;     /* CTA secondary */
+      --ring: 0 25px 50px -12px rgb(0 0 0 / .25);
+      --max: 48rem;
+    }
+
+    *{ box-sizing: border-box; }
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      color:var(--ink);
+      background:#f6f8fb;
+    }
+    a{ color:inherit; text-decoration:none; }
+
+    /* Header */
+    .header{
+      display:flex; align-items:center; justify-content:center;
+      height:64px; background:linear-gradient(90deg, #0284c7, #0ea5e9);
+      color:#fff; position:sticky; top:0; z-index:10;
+      box-shadow: 0 4px 10px rgba(0,0,0,.08);
+    }
+    .brand{
+      display:flex; align-items:center; gap:.6rem; font-weight:800; font-size:1.1rem;
+      letter-spacing:.5px;
+    }
+    .brand .logo{
+      width:40px; height:40px; border-radius:10px;
+      display:grid; place-items:center; background:#ffffff22; border:1px solid #ffffff55;
+    }
+    .tagline{ font-weight:600; opacity:.95; }
+
+    /* Live ticker */
+    .livebar{
+      background:#0b1324; color:#dbeafe; display:flex; align-items:center; justify-content:center;
+      gap:.6rem; font-size:.94rem; padding:.6rem .8rem;
+    }
+    .live-dot{
+      width:10px; height:10px; border-radius:50%; background:#ef4444; box-shadow:0 0 8px #ef4444cc;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    @keyframes pulse{
+      0%{ transform:scale(1); opacity:1; }
+      50%{ transform:scale(1.25); opacity:.75; }
+      100%{ transform:scale(1); opacity:1; }
+    }
+    .live-text{ font-weight:700; letter-spacing:.2px; }
+    .live-divider{ opacity:.35; }
+    .live-count{ font-weight:800; color:#22d3ee; }
+
+    /* Container */
+    .container{ max-width:var(--max); margin-inline:auto; padding: 0 1rem; }
+
+    /* Hero */
+    .title{ text-align:center; font-size:1.9rem; font-weight:900; margin: 1rem 0 .5rem; }
+    .subtitle{ text-align:center; color:var(--muted); font-weight:600; margin-bottom:.5rem; }
+
+    /* Slider */
+    .slider{
+      position:relative; width:100%; aspect-ratio: 16/9; border-radius:14px; overflow:hidden;
+      box-shadow: var(--ring); background:#000;
+      margin: .35rem 0 1rem;
+    }
+    .slides{ display:flex; width:300%; height:100%; transform: translateX(0%); transition: transform .6s ease; }
+    .slide{ flex:0 0 100%; height:100%; background:center/cover no-repeat; }
+    .slide-1{ background-image:url('https://images.unsplash.com/photo-1660330589257-813305a4a383?w=1600&q=80&auto=format&fit=crop'); }
+    .slide-2{ background-image:url('https://plus.unsplash.com/premium_photo-1682148026899-d21f17c04e80?w=1600&q=80&auto=format&fit=crop'); }
+    .slide-3{ background-image:linear-gradient(120deg,#00000099,#00000033),url('https://images.unsplash.com/photo-1660330589257-813305a4a383?w=1600&q=60&auto=format&fit=crop'); }
+
+    .slider-arrows{
+      position:absolute; inset:0; display:flex; justify-content:space-between; align-items:center;
+      padding:0 .4rem; pointer-events:none;
+    }
+    .arrow{
+      pointer-events:auto; width:42px; height:42px; border-radius:50%; display:grid; place-items:center;
+      background:#ffffffbb; border:1px solid #fff; backdrop-filter: blur(2px); cursor:pointer;
+    }
+    .dots{ position:absolute; left:0; right:0; bottom:10px; display:flex; gap:8px; justify-content:center; }
+    .dot{ width:10px; height:10px; border-radius:50%; background:#ffffff90; border:1px solid #fff; cursor:pointer; }
+    .dot.active{ background:#fff; }
+
+    /* Quiz */
+    .chip{
+      margin:.25rem auto .25rem; width:max-content; background:#e0f2fe; color:#075985; border:1px solid #bae6fd;
+      font-weight:800; padding:.5rem .85rem; border-radius:999px; box-shadow:0 2px 0 #bae6fd;
+    }
+    .card{
+      background:#ffffff; border-radius:12px; padding:18px 16px 16px;
+      box-shadow: var(--ring); margin-bottom: 1.2rem;
+    }
+    .q-title{ font-size:1.35rem; font-weight:800; text-align:center; margin:.25rem 0 .5rem; }
+    .answers{ display:grid; grid-template-columns:1fr; gap:.6rem; margin-top:.8rem; }
+    .btn{
+      border:none; cursor:pointer; font-weight:800; text-transform:none; letter-spacing:.2px;
+      padding:1rem 1rem; border-radius:14px; display:flex; justify-content:center; align-items:center;
+      box-shadow: var(--ring); transition: transform .06s ease, filter .15s ease;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn-primary{ background:linear-gradient(180deg,#22c55e,#16a34a); color:#fff; }
+    .btn-outline{
+      background:#fff; color:#0f172a; border:2px solid #0f172a15;
+    }
+    .badge{ font-weight:900; color:#059669; margin-left:.5rem; }
+
+    /* Status & Congrats */
+    .status, .congrats{
+      text-align:center; padding:1.1rem; background:#f1f5f9; border-top:2px solid #0ea5e9;
+      max-width:var(--max); margin: 1rem auto; border-radius:10px; font-weight:700;
+    }
+    .hidden{ display:none; }
+
+    .summary{
+      margin:.75rem auto; padding:.75rem .9rem; background:#ecfeff; border:1px dashed #06b6d4; color:#155e75;
+      width:100%; border-radius:10px; text-align:left; font-weight:700;
+    }
+    .summary b{ color:#0891b2; }
+
+    .cta-stack{ display:flex; flex-direction:column; gap:.6rem; margin-top:.8rem; }
+    .cta{ composes: btn; }
+    .cta-call{ background:linear-gradient(180deg,#16a34a,#15803d); color:#fff; }
+    .cta-wa{ background:#fff; border:2px dashed #16a34a; color:#065f46; }
+    .cta-wa i{ margin-right:.5rem; color:#16a34a; }
+
+    .timer{
+      display:inline-flex; gap:.4rem; padding:.35rem .6rem; border:2px dashed #ef4444; color:#ef4444; border-radius:8px; margin-top:.5rem;
+      font-weight:800;
+    }
+
+    .foot{
+      max-width:var(--max); margin: 14vh auto 2rem; padding:1rem; text-align:center; color:#475569; font-size:.92rem;
+    }
+    .foot .links{ margin-top:.4rem; display:flex; flex-wrap:wrap; gap:.8rem; justify-content:center; }
+    .divider{ height:1px; width:100%; background:#cbd5e1; margin:.8rem 0; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">
+      <div class="logo"><i class="fa-solid fa-sun"></i></div>
+      <div>
+        <div>SPG</div>
+        <div class="tagline" style="font-size:.8rem;">Smart. Powerful. Green.</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Live bar (no image, real LIVE icon) -->
+  <div class="livebar">
+    <span class="live-dot" aria-hidden="true"></span>
+    <span class="live-text">LIVE</span>
+    <span class="live-divider">•</span>
+    <span>Site surveys booked today:</span>
+    <span class="live-count" id="liveCount">213</span>
+  </div>
+
+  <main class="container">
+    <h1 class="title">Check Your Solar Savings Eligibility</h1>
+    <p class="subtitle">Takes 60 seconds. No obligation—see if you qualify for subsidy & low-cost financing.</p>
+
+    <!-- Slider with your two images (plus a third cloned visual) -->
+    <section class="slider" aria-label="SPG solar showcase">
+      <div class="slides" id="slides">
+        <div class="slide slide-1" role="img" aria-label="SPG — Residential rooftop solar"></div>
+        <div class="slide slide-2" role="img" aria-label="SPG — Commercial solar plants"></div>
+        <div class="slide slide-3" role="img" aria-label="SPG — Savings & sustainability"></div>
+      </div>
+      <div class="slider-arrows">
+        <button class="arrow" id="prevBtn" aria-label="Previous slide"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="arrow" id="nextBtn" aria-label="Next slide"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+      <div class="dots" id="dots"></div>
+    </section>
+
+    <!-- Quiz -->
+    <div class="chip">Answer the questions below to proceed</div>
+
+    <section class="card" id="quizCard">
+      <div class="q-title" id="qTitle">What’s the purpose of your solar setup?</div>
+
+      <div class="answers" id="answers">
+        <button class="btn btn-primary" onclick="answerPurpose('Residential')">Residential</button>
+        <button class="btn btn-outline" onclick="answerPurpose('Homes')">Homes</button>
+        <button class="btn btn-outline" onclick="answerPurpose('Commercial')">Commercial</button>
+      </div>
+
+      <div id="liveRow" style="display:flex; align-items:center; justify-content:center; gap:.6rem; margin-top:.8rem; color:#065f46;">
+        <span class="live-dot" aria-hidden="true" style="background:#16a34a; box-shadow:0 0 8px #16a34a99;"></span>
+        <em><span id="claiming" style="font-weight:800; color:#059669;">79</span>&nbsp;people are checking right now</em>
+      </div>
+    </section>
+
+    <!-- Status -->
+    <div class="status hidden" id="statusBox">
+      <span id="statusMsg">Reviewing your answers…</span>
+    </div>
+
+    <!-- Congrats -->
+    <section class="congrats hidden" id="congratsBox">
+      <div style="font-size:1.35rem; font-weight:900; color:#059669;">
+        🎉 Congratulations! You’re Eligible for Solar Savings
+      </div>
+
+      <div class="summary" id="summaryBox">
+        Purpose: <b id="sumPurpose">Residential</b> • You are a <b>Homeowner</b> • Bill: <b id="sumBill">&lt; ₹2,000</b>.<br/>
+        Our engineer will call to plan your site survey and guide subsidy/loan steps.
+      </div>
+
+      <div class="cta-stack">
+        <!-- Replace phone number and WhatsApp number as needed -->
+        <a class="btn cta-call" href="tel:+919000000000">
+          Call SphTraders Now
+        </a>
+        <a class="btn cta-wa" target="_blank" rel="noopener" href="https://wa.me/919000000000?text=Hi%20SPG%2C%20I%20want%20to%20go%20solar.">
+          <i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp
+        </a>
+      </div>
+
+      <p class="subtitle" style="margin:.8rem 0 0;">
+        Our team will help with system design, subsidy & loan paperwork, and installation timeline.
+      </p>
+
+      <div class="timer"><span id="tmM">3</span>:<span id="tmS">00</span></div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="foot">
+    <div>© <span id="year"></span> SPG — Smart. Powerful. Green.</div>
+    <div class="divider"></div>
+    <div class="links">
+      <a href="/terms.html">Terms & Conditions</a>
+      <span>•</span>
+      <a href="/privacy.html">Privacy Policy</a>
+    </div>
+  </footer>
+
+  <script>
+    /* ------- Live counters ------- */
+    const liveCount = document.getElementById('liveCount');
+    const claiming = document.getElementById('claiming');
+    if (liveCount){
+      setInterval(()=> {
+        const n = parseInt(liveCount.textContent,10);
+        liveCount.textContent = n + Math.floor(Math.random()*3+1);
+      }, 3000);
+    }
+    if (claiming){
+      setInterval(()=> {
+        const n = parseInt(claiming.textContent,10);
+        claiming.textContent = n + Math.floor(Math.random()*2+1);
+      }, 2800);
+    }
+
+    /* ------- Year ------- */
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    /* ------- Slider ------- */
+    const slides = document.getElementById('slides');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const dotsWrap = document.getElementById('dots');
+    const total = 3;
+    let idx = 0, auto;
+
+    function renderDots(){
+      dotsWrap.innerHTML = '';
+      for(let i=0;i<total;i++){
+        const d = document.createElement('button');
+        d.className = 'dot' + (i===idx?' active':'');
+        d.setAttribute('aria-label','Go to slide ' + (i+1));
+        d.onclick = () => { idx=i; update(); restartAuto(); };
+        dotsWrap.appendChild(d);
+      }
+    }
+    function update(){
+      slides.style.transform = `translateX(-${idx*100}%)`;
+      [...dotsWrap.children].forEach((d,i)=> d.classList.toggle('active', i===idx));
+    }
+    function next(){ idx = (idx+1)%total; update(); }
+    function prev(){ idx = (idx-1+total)%total; update(); }
+    function startAuto(){ auto = setInterval(next, 3800); }
+    function restartAuto(){ clearInterval(auto); startAuto(); }
+
+    prevBtn.addEventListener('click', ()=>{ prev(); restartAuto(); });
+    nextBtn.addEventListener('click', ()=>{ next(); restartAuto(); });
+
+    renderDots(); update(); startAuto();
+
+    /* ------- Quiz Logic ------- */
+    const qTitle = document.getElementById('qTitle');
+    const answers = document.getElementById('answers');
+    const quizCard = document.getElementById('quizCard');
+    const statusBox = document.getElementById('statusBox');
+    const statusMsg = document.getElementById('statusMsg');
+    const congratsBox = document.getElementById('congratsBox');
+    const sumPurpose = document.getElementById('sumPurpose');
+    const sumBill = document.getElementById('sumBill');
+    const tmM = document.getElementById('tmM');
+    const tmS = document.getElementById('tmS');
+
+    let selected = { purpose: null, bill: null };
+
+    function answerPurpose(p){
+      selected.purpose = (p === 'Homes') ? 'Residential' : p; // treat "Homes" as Residential
+      // Next question
+      qTitle.textContent = "What’s your average monthly electricity bill?";
+      answers.innerHTML = `
+        <button class="btn btn-primary" onclick="answerBill('< ₹2,000')">&lt; ₹2,000</button>
+        <button class="btn btn-outline" onclick="answerBill('> ₹2,000')">&gt; ₹2,000 <span class='badge'>Save More</span></button>
+      `;
+      smoothScrollTo(quizCard.offsetTop - 12, 500);
+    }
+
+    function answerBill(b){
+      selected.bill = b;
+      runStatus(() => showCongrats());
+    }
+
+    function runStatus(done){
+      quizCard.classList.add('hidden');
+      statusBox.classList.remove('hidden');
+
+      statusMsg.textContent = "Reviewing your answers…";
+      setTimeout(()=> {
+        statusMsg.textContent = "Checking subsidy & financing availability…";
+        setTimeout(()=> {
+          statusMsg.textContent = "Confirming eligibility…";
+          setTimeout(done, 1100);
+        }, 1100);
+      }, 1100);
+      smoothScrollTo(0, 500);
+    }
+
+    function showCongrats(){
+      statusBox.classList.add('hidden');
+      congratsBox.classList.remove('hidden');
+
+      sumPurpose.textContent = selected.purpose || 'Residential';
+      sumBill.textContent = selected.bill || '< ₹2,000';
+
+      startTimer(3*60); // 3 minutes
+      smoothScrollTo(0, 500);
+    }
+
+    function startTimer(total){
+      const t = setInterval(()=>{
+        const m = Math.floor(total/60);
+        const s = total % 60;
+        tmM.textContent = m;
+        tmS.textContent = (s<10?'0':'') + s;
+        total--;
+        if (total < 0) clearInterval(t);
+      }, 1000);
+    }
+
+    function smoothScrollTo(targetY=0, duration=600){
+      const startY = window.pageYOffset;
+      const dist = targetY - startY;
+      let start=null;
+      function step(ts){
+        if(!start) start = ts;
+        const p = Math.min(1, (ts-start)/duration);
+        const ease = p<.5 ? 2*p*p : -1+(4-2*p)*p;
+        window.scrollTo(0, startY + dist*ease);
+        if(p<1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    // expose needed funcs
+    window.answerPurpose = answerPurpose;
+    window.answerBill = answerBill;
+  </script>
+</body>
+</html>
